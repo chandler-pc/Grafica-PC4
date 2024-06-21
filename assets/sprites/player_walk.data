@@ -1,0 +1,16 @@
+idle_down_0,0,0,14,16
+idle_down_1,28,0,14,16
+walk_down_0,14,32,14,16
+walk_down_1,14,0,14,16
+idle_up_0,0,48,14,16
+idle_up_1,0,16,14,16
+walk_up_0,0,32,14,16
+walk_up_1,28,16,14,16
+idle_left_0,14,48,10,16
+idle_left_1,34,48,10,16
+walk_left_0,42,0,10,16
+walk_left_1,14,16,10,16
+idle_right_0,28,32,10,16
+idle_right_1,42,16,10,16
+walk_right_0,24,48,10,16
+walk_right_1,42,32,10,16
