@@ -1,7 +1,8 @@
 import pygame
 import pymunk
 import pymunk.pygame_util
-from player import *
+from player import Player, Direction
+from player_interface import PlayerInterface
 
 keys = {
     pygame.K_LEFT: Direction.LEFT,
@@ -9,16 +10,34 @@ keys = {
 }
 
 class Level1:
-    def __init__(self, screen) -> None:
-        pygame.display.set_caption("Level 1 - IRA")
+    def __init__(self, screen):
+        level_name = "ANGRY"
+        pygame.display.set_caption(level_name)
         self.screen = screen
-        self.player = Player()
+        self.player = Player((100,100))
         self.running = True
         self.space = pymunk.Space()
         self.space.gravity = (0, 900)
         self.draw_options = pymunk.pygame_util.DrawOptions(self.screen)
         self.space.add(self.player.body, self.player.shape)
+        self.first_part_time = 30
+        self.is_first_part = True
         self.load_map()
+        self.player_interface = PlayerInterface(screen)
+        self.player_interface.set_text(level_name)
+        self.player_interface.set_timer(str(self.first_part_time))
+
+    def generate_logs(self):
+        for i in range(10):
+            log = FallenLogObstacle((100 + i * 100, 0))
+            self.space.add(log.body, log.shape)
+
+    def change_level_state(self, dt):
+        if self.first_part_time <= 0:
+            self.is_first_part = False
+            return
+        self.first_part_time -= dt
+        self.player_interface.set_timer(str(int(self.first_part_time)))
 
     def load_map(self, segments=None):
         if segments is None:
@@ -50,9 +69,21 @@ class Level1:
                         self.player.update_animation("idle")
 
     def update(self, dt):
+        self.handle_events()
         self.player.update(dt)
         self.space.step(dt)
+        self.change_level_state(dt)
 
     def draw(self):
         self.player.draw(self.screen)
-        #self.space.debug_draw(self.draw_options)
+        self.player_interface.draw()
+        self.space.debug_draw(self.draw_options)
+
+class FallenLogObstacle:
+    def __init__(self,position):
+        self.position = [*position]
+        self.body = pymunk.Body(10,float("inf"), body_type=pymunk.Body.DYNAMIC)
+        self.body.position = pymunk.Vec2d(self.position[0], self.position[1])
+        self.shape = pymunk.Poly.create_box(self.body, size=(20, 5))
+        self.shape.elasticity = 0.1
+        self.shape.friction = 1.

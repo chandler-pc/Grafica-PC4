@@ -12,8 +12,8 @@ class Direction(Enum):
         return self.name.lower()
 
 class Player:
-    def __init__(self) -> None:
-        self.position = [0,0]
+    def __init__(self, position) -> None:
+        self.position = [*position]
         self.velocity = 100
         self.direction = Direction.DOWN
         self.is_moving = False
@@ -23,7 +23,6 @@ class Player:
         self.animation_delta = .5
         self.actual_animation_time = self.animation_delta
         self.is_air = False
-
 
         self.body = pymunk.Body(10,float("inf"), body_type=pymunk.Body.DYNAMIC)
         self.body.position = Vec2d(self.position[0], self.position[1])
