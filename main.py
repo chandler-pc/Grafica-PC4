@@ -1,6 +1,6 @@
 import pygame
 from game import Game
-from manager import Manager
+from utils import Manager
 
 pygame.init()
 game = Game()

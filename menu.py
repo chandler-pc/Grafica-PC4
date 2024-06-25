@@ -1,6 +1,6 @@
 import pygame
 from level1 import Level1
-from manager import Manager
+from utils import Manager
 
 class Menu:
     def __init__(self,screen):

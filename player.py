@@ -14,7 +14,7 @@ class Direction(Enum):
 class Player:
     def __init__(self, position) -> None:
         self.position = [*position]
-        self.velocity = 100
+        self.velocity = 150
         self.direction = Direction.DOWN
         self.is_moving = False
         self.sprites = AssetLoader.load_sprite_sheet("player_walk", size=(48,48))
@@ -26,9 +26,14 @@ class Player:
 
         self.body = pymunk.Body(10,float("inf"), body_type=pymunk.Body.DYNAMIC)
         self.body.position = Vec2d(self.position[0], self.position[1])
-        self.shape = pymunk.Poly.create_box(self.body, size=(48, 48))
+        self.shape = pymunk.Poly.create_box(self.body, size=(30, 48))
+        self.shape.collision_type = 1 
         self.shape.elasticity = 0.1
         self.shape.friction = 1.
+
+        self.sensor = pymunk.Poly.create_box(self.body, size=(30, 5))
+        self.sensor.sensor = True
+        self.sensor.collision_type = 2
 
     def move(self):
         if not self.is_moving:
@@ -51,9 +56,8 @@ class Player:
     def jump(self):
         if self.is_air:
             return
-        self.body.apply_impulse_at_local_point((0, -5000))
+        self.body.apply_impulse_at_local_point((0, -5500))
         self.is_air = True
-        print("Jump")
     
     def update(self, dt):
         self.move()
