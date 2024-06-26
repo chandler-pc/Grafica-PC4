@@ -1,7 +1,7 @@
 from enum import Enum
 import pymunk
-from asset_loader import AssetLoader
 from pymunk.vec2d import Vec2d
+from animator import Animator
 
 class Direction(Enum):
     LEFT = 1
@@ -12,17 +12,14 @@ class Direction(Enum):
         return self.name.lower()
 
 class Player:
-    def __init__(self, position) -> None:
+    def __init__(self, position, interface) -> None:
+        self.player_interface = interface
         self.position = [*position]
         self.velocity = 150
         self.direction = Direction.DOWN
         self.is_moving = False
-        self.sprites = AssetLoader.load_sprite_sheet("player_walk", size=(48,48))
-        self.animation_name = "idle_down_"
-        self.sprite = self.sprites['idle_down_0']
-        self.animation_delta = .5
-        self.actual_animation_time = self.animation_delta
-        self.is_air = False
+        self.is_air = True
+        self.animator = Animator("player", (48, 48))
 
         self.body = pymunk.Body(10,float("inf"), body_type=pymunk.Body.DYNAMIC)
         self.body.position = Vec2d(self.position[0], self.position[1])
@@ -35,45 +32,84 @@ class Player:
         self.sensor.sensor = True
         self.sensor.collision_type = 2
 
+        self.invincible = False
+        self.invincible_timer = 0
+        self.invincible_blink_timer = 0
+        self.attacking = False
+        self.attack_timer = 0
+        self.attack_blink_timer = 0
+
+        self.life = 10
+
     def move(self):
-        if not self.is_moving:
+        if not self.is_moving or self.attacking:
             return
         if self.direction == Direction.LEFT:
-            self.body.velocity = (-self.velocity, self.body.velocity.y)
+            self.body.apply_impulse_at_local_point((-self.velocity, 0))
         elif self.direction == Direction.RIGHT:
+            self.body.apply_impulse_at_local_point((self.velocity, 0))
+        if self.body.velocity.x > self.velocity:
             self.body.velocity = (self.velocity, self.body.velocity.y)
+        elif self.body.velocity.x < -self.velocity:
+            self.body.velocity = (-self.velocity, self.body.velocity.y)
 
     def set_direction(self, direction):
         self.direction = direction
         self.is_moving = True
-        self.update_animation("walk")
+        self.animator.update_animation(str(direction))
     
     def set_stop(self):
         self.is_moving = False
         self.direction = Direction.DOWN
         self.body.velocity = (0, self.body.velocity.y)
+        self.animator.update_animation("idle")
 
     def jump(self):
-        if self.is_air:
+        if self.is_air or self.attacking:
             return
         self.body.apply_impulse_at_local_point((0, -5500))
         self.is_air = True
     
     def update(self, dt):
         self.move()
-        self.actual_animation_time -= dt
-        if self.actual_animation_time <= 0:
-            self.actual_animation_time = self.animation_delta
-
-    def update_animation(self, animation_name):
-        self.animation_name = animation_name + "_" + str(self.direction) + "_"
-        self.actual_animation_time = self.animation_delta
+        self.animator.update(dt)
+        if self.invincible:
+            self.invincible_timer -= dt
+            self.invincible_blink_timer -= dt
+            if self.invincible_blink_timer <= 0:
+                self.invincible_blink_timer = 0.1
+            if self.invincible_timer <= 0:
+                self.invincible = False
+        if self.attacking:
+            self.attack_timer -= dt
+            self.attack_blink_timer -= dt
+            if self.attack_blink_timer <= 0:
+                self.attack_blink_timer = 0.1
+            if self.attack_timer <= 0:
+                self.attacking = False
 
     def draw(self, screen):
         x, y = self.body.position
-        self.animate()
-        screen.blit(self.sprite, (x-24, y-24))
+        if self.invincible and int(self.invincible_timer * 10) % 2 == 0:
+            self.animator.animate(x, y, screen, color=(0,0,0))
+        elif self.attacking and int(self.attack_timer * 10) % 2 == 0:
+            self.animator.animate(x, y, screen, color=(0, 255, 0))
+        else:
+            self.animator.animate(x, y, screen)
 
-    def animate(self):
-        animation_name = self.animation_name + str(int((self.actual_animation_time / self.animation_delta) * 2) % 2)
-        self.sprite = self.sprites[animation_name]
+    def take_damage(self):
+        if not self.invincible:
+            self.life -= 1
+            self.invincible = True
+            self.invincible_timer = 1.0
+            self.invincible_blink_timer = 0.1
+            if self.life <= 0:
+                self.life = 0
+                self.player_interface.set_life_text(f"DEAD")
+            else:
+                self.player_interface.set_life_text(f"Life {self.life}")
+
+    def attack(self):
+        if not self.attacking and not self.is_air:
+            self.attacking = True
+            self.attack_timer = 0.5  

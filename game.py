@@ -1,4 +1,5 @@
 import pygame
+from level1 import Level1
 from menu import Menu
 class Game:
     def __init__(self) -> None:
