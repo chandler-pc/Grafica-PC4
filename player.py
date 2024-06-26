@@ -19,7 +19,7 @@ class Player:
         self.direction = Direction.DOWN
         self.is_moving = False
         self.is_air = True
-        self.animator = Animator("player", (48, 48))
+        self.animator = Animator("player", (48, 48),0.2)
 
         self.body = pymunk.Body(10,float("inf"), body_type=pymunk.Body.DYNAMIC)
         self.body.position = Vec2d(self.position[0], self.position[1])
@@ -109,7 +109,8 @@ class Player:
             else:
                 self.player_interface.set_life_text(f"Life {self.life}")
 
-    def attack(self):
+    def attack(self, enemy):
         if not self.attacking and not self.is_air:
             self.attacking = True
-            self.attack_timer = 0.5  
+            self.attack_timer = 0.5
+            enemy.take_damage()

@@ -1,6 +1,6 @@
 import pygame
-from level1 import Level1
 from menu import Menu
+import asyncio
 class Game:
     def __init__(self) -> None:
         self.WIDTH = 800
@@ -14,7 +14,7 @@ class Game:
         self.screen.fill((0, 0, 0))
         self.actual_level.draw()
 
-    def run(self):
+    async def run(self):
         while True:
             dt = self.clock.tick(self.fps) / 1000
             self.actual_level.update(dt)
