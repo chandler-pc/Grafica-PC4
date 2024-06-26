@@ -3,7 +3,7 @@ import pygame
 class PlayerInterface:
     def __init__(self, screen):
         self.screen = screen
-        self.font = pygame.font.Font("assets/fonts/easvhs.ttf", 28)
+        self.font = pygame.font.Font("easvhs.ttf", 28)
         self.color = (255,255,255)
         self.level_name = ""
         self.level_name_rect = None

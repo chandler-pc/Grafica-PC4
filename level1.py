@@ -204,7 +204,7 @@ class FallenLogObstacle:
 class ManagerLevel1:
     def __init__(self, space, player, player_interface):
         self.level_state = LevelState.FIRST_PART
-        self.first_part_time = 1
+        self.first_part_time = 30
         self.is_first_part = True
         self.player_interface = player_interface
         self.space = space
@@ -307,7 +307,7 @@ class DragonBoss:
         self.velocity = 1000
         self.fireball_cooldown = 0
 
-        self.life = 3
+        self.life = 10
 
         self.blink_time = 0
         self.blink_duration = 1.0

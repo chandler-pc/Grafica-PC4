@@ -15,7 +15,7 @@ class Menu:
                 exit()
 
     def draw(self):
-        self.screen.fill((0, 0, 0))
+        self.screen.fill((125,125,125))
         self.button.draw()
 
     def update(self,dt):

@@ -39,7 +39,7 @@ class Player:
         self.attack_timer = 0
         self.attack_blink_timer = 0
 
-        self.life = 10
+        self.life = 5
 
     def move(self):
         if not self.is_moving or self.attacking:

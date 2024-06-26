@@ -3,6 +3,7 @@ from menu import Menu
 import asyncio
 class Game:
     def __init__(self) -> None:
+        pygame.init()
         self.WIDTH = 800
         self.HEIGHT = 600
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
@@ -20,3 +21,4 @@ class Game:
             self.actual_level.update(dt)
             self.draw()
             pygame.display.flip()
+            await asyncio.sleep(0)
