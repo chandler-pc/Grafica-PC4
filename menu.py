@@ -1,4 +1,5 @@
 import pygame
+from asset_loader import AssetLoader
 from level1 import Level1
 from utils import Manager
 
@@ -6,7 +7,7 @@ class Menu:
     def __init__(self,screen):
         self.screen = screen
         pygame.display.set_caption("Menu")
-        self.button = Button(self.screen,"Start",100,100,100,50)
+        self.button = Button(self.screen,250,229,300,150)
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -15,7 +16,7 @@ class Menu:
                 exit()
 
     def draw(self):
-        self.screen.fill((125,125,125))
+        self.screen.fill((153, 204, 255))
         self.button.draw()
 
     def update(self,dt):
@@ -24,24 +25,24 @@ class Menu:
         pass
 
 class Button:
-    def __init__(self,screen,text,x,y,width,height):
+    def __init__(self,screen,x,y,width,height):
         self.screen = screen
-        self.text = text
         self.x = x
         self.y = y
         self.width = width
         self.height = height
-        self.font = pygame.font.Font(None, 36)
-        self.color = (255,255,255)
-        self.hover_color = (200,200,200)
-        self.clicked_color = (150,150,150)
         self.is_clicked = False
+        self.image = AssetLoader.load_image("PlayButton.png")
+        self.image_hover = AssetLoader.load_image("PlayButtonHover.png")
+        self.image = pygame.transform.scale(self.image,(self.width,self.height))
+        self.image_hover = pygame.transform.scale(self.image_hover,(self.width,self.height))
 
     def draw(self):
-        pygame.draw.rect(self.screen,self.color,(self.x,self.y,self.width,self.height))
-        text = self.font.render(self.text,True,(0,0,0))
-        text_rect = text.get_rect(center=(self.x+self.width/2,self.y+self.height/2))
-        self.screen.blit(text,text_rect)
+        mouse = pygame.mouse.get_pos()
+        if self.x < mouse[0] < self.x + self.width and self.y < mouse[1] < self.y + self.height:
+            self.screen.blit(self.image_hover,(self.x,self.y))
+        else:
+            self.screen.blit(self.image,(self.x,self.y))
 
     def update(self):
         mouse = pygame.mouse.get_pos()
@@ -52,9 +53,5 @@ class Button:
                 return
         self.is_clicked = False
         if self.x < mouse[0] < self.x + self.width and self.y < mouse[1] < self.y + self.height:
-            self.color = self.hover_color
             if click[0]:
-                self.color = self.clicked_color
                 self.is_clicked = True
-        else:
-            self.color = (255,255,255)

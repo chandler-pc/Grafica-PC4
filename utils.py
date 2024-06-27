@@ -14,6 +14,7 @@ class Manager():
 class LevelState(Enum):
     FIRST_PART = 1
     SECOND_PART = 2
+    GAME_OVER = 3
 
 
     

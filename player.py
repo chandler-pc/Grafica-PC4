@@ -2,6 +2,7 @@ from enum import Enum
 import pymunk
 from pymunk.vec2d import Vec2d
 from animator import Animator
+from utils import LevelState
 
 class Direction(Enum):
     LEFT = 1
@@ -39,7 +40,7 @@ class Player:
         self.attack_timer = 0
         self.attack_blink_timer = 0
 
-        self.life = 5
+        self.life = 10
 
     def move(self):
         if not self.is_moving or self.attacking:
@@ -71,6 +72,8 @@ class Player:
         self.is_air = True
     
     def update(self, dt):
+        if self.life <= 0:
+            return
         self.move()
         self.animator.update(dt)
         if self.invincible:
@@ -106,6 +109,7 @@ class Player:
             if self.life <= 0:
                 self.life = 0
                 self.player_interface.set_life_text(f"DEAD")
+                self.manager.level_state = LevelState.GAME_OVER
             else:
                 self.player_interface.set_life_text(f"Life {self.life}")
 

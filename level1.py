@@ -4,13 +4,17 @@ import pygame
 import pymunk
 import pymunk.pygame_util
 from animator import Animator
+from asset_loader import AssetLoader
 from player import Player, Direction
 from player_interface import PlayerInterface
 from utils import LevelState
+from pytmx import load_pygame
 
 keys = {
     pygame.K_LEFT: Direction.LEFT,
-    pygame.K_RIGHT: Direction.RIGHT
+    pygame.K_RIGHT: Direction.RIGHT,
+    pygame.K_a: Direction.LEFT,
+    pygame.K_d: Direction.RIGHT,
 }
 
 
@@ -22,7 +26,7 @@ class Level1:
         self.running = True
         self.player_interface = PlayerInterface(screen)
         self.player_interface.set_level_name(level_name)
-        self.player = Player((100, 100), self.player_interface)
+        self.player = Player((100, 300), self.player_interface)
         self.space = pymunk.Space()
         self.space.gravity = (0, 900)
         self.draw_options = pymunk.pygame_util.DrawOptions(self.screen)
@@ -31,6 +35,11 @@ class Level1:
         self.load_map()
         self.manager = ManagerLevel1(
             self.space, self.player, self.player_interface)
+        
+        self.player.manager = self.manager
+        
+        self.background = pygame.transform.scale(AssetLoader.load_image("background.png"), (800, 608))
+        self.tmxdata = load_pygame("map.tmx")
 
         handler = self.space.add_collision_handler(1, 2)
         handler.begin = self.on_ground_begin
@@ -118,7 +127,7 @@ class Level1:
         return True
 
     def load_map(self):
-        ground = ((-200, 550), (1400, 550), 2, 0.5, 0.5)
+        ground = ((-200, 544), (1400, 544), 2, 0.5, 0.5)
         start, end, thickness, elasticity, friction = ground
         body = pymunk.Body(body_type=pymunk.Body.STATIC)
         shape = pymunk.Segment(body, start, end, thickness)
@@ -127,7 +136,7 @@ class Level1:
         shape.collision_type = 2
         self.space.add(body, shape)
         for _ in range(2):
-            wall = ((800 * _, 0), (800 * _, 600), 2, 0.5, 0.5)
+            wall = ((800 * _, -200), (800 * _, 600), 2, 0.5, 0.5)
             start, end, thickness, elasticity, friction = wall
             body = pymunk.Body(body_type=pymunk.Body.STATIC)
             shape = pymunk.Segment(body, start, end, thickness)
@@ -136,9 +145,11 @@ class Level1:
             shape.collision_type = 6
             self.space.add(body, shape)
         platforms = [
-            ((200, 400), (100, 10)),
-            ((400, 300), (100, 10)),
-            ((600, 200), (100, 10)),
+            ((192, 408), (96, 16)),
+            ((432, 360), (96, 16)),
+            ((624, 232), (96, 16)),
+            ((112, 168), (96, 16)),
+            ((368, 200), (96, 16)),
         ]
         for pos, size in platforms:
             platform = Platform(pos, size)
@@ -156,7 +167,8 @@ class Level1:
                 if event.key == pygame.K_SPACE:
                     self.player.jump()
                 if event.key == pygame.K_q:
-                    self.player.attack(self.manager.dragon_boss)
+                    if self.manager.level_state == LevelState.SECOND_PART:
+                        self.player.attack(self.manager.dragon_boss)
             if event.type == pygame.KEYUP:
                 if event.key in keys.keys():
                     if self.player.direction == keys[event.key]:
@@ -168,9 +180,11 @@ class Level1:
         self.space.step(dt)
         self.manager.update(dt)
 
-    def draw(self):
-        for platform in self.platforms:
-            platform.draw(self.screen)
+    def draw(self): 
+        self.screen.blit(self.background, (0, 0))
+        for layer in self.tmxdata.visible_layers:
+            for x, y, image in layer.tiles():
+                self.screen.blit(image, (x * 16, y * 16))
         self.player.draw(self.screen)
         self.manager.draw(self.screen)
         self.player_interface.draw()
@@ -328,10 +342,12 @@ class DragonBoss:
 
         if self.state_timer <= 0:
             if self.state == DragonBoss.State.MOVING:
+                self.animator.update_animation("idle")
                 self.state = DragonBoss.State.ATTACKING
                 self.fireball_cooldown = random.uniform(0.3,0.5)
             else:
                 self.state = DragonBoss.State.MOVING
+                self.animator.update_animation("walk")
             self.state_timer = random.uniform(2.0, 5.0)
 
         if self.state == DragonBoss.State.MOVING:
