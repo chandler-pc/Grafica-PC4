@@ -4,7 +4,7 @@ class PlayerInterface:
     def __init__(self, screen):
         self.screen = screen
         self.font = pygame.font.Font("easvhs.ttf", 28)
-        self.color = (255,255,255)
+        self.color = (0, 0, 139)
         self.level_name = ""
         self.level_name_rect = None
         self.stage_text = "00"
@@ -34,4 +34,4 @@ class PlayerInterface:
         self.screen.blit(self.font.render(self.stage_text, True, self.color), self.stage_text_rect)
         self.screen.blit(self.font.render(self.level_name, True, self.color), self.level_name_rect)
         self.screen.blit(self.font.render(self.help_text, True, self.color), self.help_text_rect)
-        self.screen.blit(self.font.render(self.life_text, True, self.color), self.life_text_rect)
+        self.screen.blit(self.font.render(self.life_text, True, (185, 188, 250)), self.life_text_rect)

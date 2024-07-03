@@ -1,0 +1,51 @@
+{
+    "description": "The level 1",
+    "initial": [
+        {
+            "lines": [
+                "Este es el primer párrafo del nivel 1",
+                "",
+                "",
+                ""
+            ]
+        },
+        {
+            "lines": [
+                "Este es el segundo párrafo del nivel 1",
+                "",
+                "",
+                ""
+            ]
+        }
+    ],
+    "boss": [
+        {
+            "lines": [
+                "JEFE",
+                "",
+                "",
+                ""
+            ]
+        }
+    ],
+    "final": [
+        {
+            "lines": [
+                "FINAL",
+                "",
+                "",
+                ""
+            ]
+        }
+    ],
+    "lose": [
+        {
+            "lines": [
+                "PERDER",
+                "",
+                "",
+                ""
+            ]
+        }
+    ]
+}

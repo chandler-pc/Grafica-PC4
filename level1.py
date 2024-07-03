@@ -7,7 +7,8 @@ from animator import Animator
 from asset_loader import AssetLoader
 from player import Player, Direction
 from player_interface import PlayerInterface
-from utils import LevelState
+from text_canvas import TextCanvas
+from utils import LevelState, Manager
 from pytmx import load_pygame
 
 keys = {
@@ -23,10 +24,11 @@ class Level1:
         level_name = "ANGRY"
         pygame.display.set_caption(level_name)
         self.screen = screen
+        self.text_canvas = TextCanvas(screen)
         self.running = True
         self.player_interface = PlayerInterface(screen)
         self.player_interface.set_level_name(level_name)
-        self.player = Player((100, 300), self.player_interface)
+        self.player = Player((100, 100), self.player_interface)
         self.space = pymunk.Space()
         self.space.gravity = (0, 900)
         self.draw_options = pymunk.pygame_util.DrawOptions(self.screen)
@@ -34,11 +36,12 @@ class Level1:
         self.platforms = []
         self.load_map()
         self.manager = ManagerLevel1(
-            self.space, self.player, self.player_interface)
-        
+            self.space, self.player, self.player_interface, self.text_canvas)
+
         self.player.manager = self.manager
-        
-        self.background = pygame.transform.scale(AssetLoader.load_image("background.png"), (800, 608))
+
+        self.background = pygame.transform.scale(
+            AssetLoader.load_image("background.png"), (800, 608))
         self.tmxdata = load_pygame("map.tmx")
 
         handler = self.space.add_collision_handler(1, 2)
@@ -95,7 +98,7 @@ class Level1:
                 log.destroy()
                 break
         return True
-    
+
     def on_fireball_hit_player(self, arbiter, space, data):
         self.player.take_damage()
         fireball_shape = arbiter.shapes[1]
@@ -122,7 +125,7 @@ class Level1:
 
     def ignore_collision(self, arbiter, space, data):
         return False
-    
+
     def only_collision(self, arbiter, space, data):
         return True
 
@@ -162,8 +165,50 @@ class Level1:
                 pygame.quit()
                 exit()
             if event.type == pygame.KEYDOWN:
+                if self.manager.level_state == LevelState.TEXT:
+                    if event.key == pygame.K_SPACE:
+                        self.continue_text = self.text_canvas.add_line()
+                        if not self.continue_text and self.manager.win:
+                            self.manager.level_state = LevelState.MENU
+                            self.player_interface.set_help_text(
+                                "Press ESC to exit")
+                            self.player_interface.set_life_text("")
+                            self.player_interface.set_stage_text("VICTORY")
+                            return
+                        if not self.continue_text and self.manager.level_state == LevelState.GAME_OVER:
+                            self.manager.level_state = LevelState.MENU
+                            self.player_interface.set_help_text(
+                                "Press ESC to exit")
+                            self.player_interface.set_life_text("")
+                            self.player_interface.set_stage_text("GAME OVER")
+                            return
+                        if not self.continue_text and not self.manager.end_first_part:
+                            self.manager.level_state = LevelState.FIRST_PART
+                            self.player_interface.set_help_text(
+                                "Dodge the logs")
+                            self.player_interface.set_life_text(
+                                "Life " + str(self.player.life))
+                            self.player_interface.set_stage_text(
+                                str(self.manager.first_part_time))
+                            return
+                        if not self.continue_text and self.manager.end_first_part:
+                            self.manager.level_state = LevelState.SECOND_PART
+                            self.player_interface.set_help_text(
+                                "Press Q to calm")
+                            self.player_interface.set_life_text(
+                                "Life " + str(self.player.life))
+                            self.player_interface.set_stage_text("BOSS FIGHT!")
+                            return
+                    return
+
+                if event.key == pygame.K_ESCAPE:
+                    if self.manager.level_state == LevelState.MENU:
+                        from menu import Menu
+                        Manager.change_level(Menu(self.screen))
+                        return
                 if event.key in keys.keys():
-                    self.player.set_direction(keys[event.key])
+                    if not self.player.animation_move:
+                        self.player.set_direction(keys[event.key])
                 if event.key == pygame.K_SPACE:
                     self.player.jump()
                 if event.key == pygame.K_q:
@@ -179,16 +224,21 @@ class Level1:
         self.player.update(dt)
         self.space.step(dt)
         self.manager.update(dt)
+        self.text_canvas.update(dt)
 
-    def draw(self): 
+    def draw(self):
         self.screen.blit(self.background, (0, 0))
         for layer in self.tmxdata.visible_layers:
             for x, y, image in layer.tiles():
                 self.screen.blit(image, (x * 16, y * 16))
         self.player.draw(self.screen)
         self.manager.draw(self.screen)
+        if self.manager.level_state == LevelState.TEXT:
+            self.text_canvas.draw()
+            return
         self.player_interface.draw()
-        #self.space.debug_draw(self.draw_options)
+        # self.space.debug_draw(self.draw_options)
+
 
 class FallenLogObstacle:
     def __init__(self, position, time_alive):
@@ -212,13 +262,14 @@ class FallenLogObstacle:
         return self.time_alive > 0
 
     def draw(self, screen):
-        pygame.draw.rect(screen, (139, 25, 30), (self.body.position[0]-10, self.body.position[1], 20, 5))
+        pygame.draw.rect(screen, (139, 25, 30),
+                         (self.body.position[0]-10, self.body.position[1], 20, 5))
 
 
 class ManagerLevel1:
-    def __init__(self, space, player, player_interface):
-        self.level_state = LevelState.FIRST_PART
-        self.first_part_time = 30
+    def __init__(self, space, player, player_interface, text_canvas):
+        self.level_state = LevelState.TEXT
+        self.first_part_time = 5
         self.is_first_part = True
         self.player_interface = player_interface
         self.space = space
@@ -228,11 +279,15 @@ class ManagerLevel1:
         self.log_alive_time = 2
         self.log_spawn_time = (0.1, 0.8)
         self.log_spawn_delta = random.uniform(*self.log_spawn_time)
-        self.dragon_boss = DragonBoss((1000, 100), self)
+        self.dragon_boss = DragonBoss((900, 100), self)
         self.space.add(self.dragon_boss.body, self.dragon_boss.shape)
         self.player_interface.set_stage_text(str(self.first_part_time))
         self.player_interface.set_help_text("Dodge the logs")
         self.player_interface.set_life_text("Life " + str(self.player.life))
+        self.time_to_boss = 1.2
+        self.text_canvas = text_canvas
+        self.end_first_part = False
+        self.win = False
 
     def add_fireball(self, fireball):
         self.fireballs.append(fireball)
@@ -243,6 +298,13 @@ class ManagerLevel1:
             self.first_part_logic(dt)
         elif self.level_state == LevelState.SECOND_PART:
             self.second_part_logic(dt)
+        elif self.level_state == LevelState.GAME_OVER:
+            if self.player.life <= 0:
+                self.text_canvas.update_paragraphs("lose")
+            else:
+                self.win = True
+                self.text_canvas.update_paragraphs("final")
+            self.level_state = LevelState.TEXT
 
         for fireball in self.fireballs:
             fireball.update(dt)
@@ -268,6 +330,8 @@ class ManagerLevel1:
             self.remove_all_logs()
             self.player_interface.set_help_text("Press Q to calm")
             self.level_state = LevelState.SECOND_PART
+            self.player.move_to(100)
+            self.end_first_part = True
             return
         for log in self.logs:
             log.update(dt)
@@ -281,6 +345,11 @@ class ManagerLevel1:
         self.player_interface.set_stage_text(str(int(self.first_part_time)))
 
     def second_part_logic(self, dt):
+        if self.time_to_boss >= 0:
+            self.time_to_boss -= dt
+            if self.time_to_boss <= 0:
+                self.level_state = LevelState.TEXT
+                self.text_canvas.update_paragraphs("boss")
         self.dragon_boss.update(dt, self.player.body.position)
 
     def remove_fireball(self, fireball):
@@ -305,23 +374,25 @@ class DragonBoss:
     def __init__(self, position, manager):
         self.size = (184, 120)
         self.position = [*position]
-        self.body = pymunk.Body(100, float("inf"), body_type=pymunk.Body.DYNAMIC)
+        self.body = pymunk.Body(100, float(
+            "inf"), body_type=pymunk.Body.DYNAMIC)
         self.body.position = pymunk.Vec2d(self.position[0], self.position[1])
-        self.shape = pymunk.Poly.create_box(self.body, size=(self.size[0]-80,self.size[1]-40))
+        self.shape = pymunk.Poly.create_box(
+            self.body, size=(self.size[0]-80, self.size[1]-40))
         self.shape.elasticity = 0.1
         self.shape.friction = 1.0
         self.shape.collision_type = 4
         self.facing_right = True
-        self.animator = Animator("dragon", self.size,0.3)
+        self.animator = Animator("dragon", self.size, 0.3)
         self.animator.update_animation("walk")
         self.manager = manager
 
         self.state = DragonBoss.State.MOVING
-        self.state_timer = random.uniform(2.0, 5.0)
+        self.state_timer = 3.
         self.velocity = 1000
         self.fireball_cooldown = 0
 
-        self.life = 10
+        self.life = 5
 
         self.blink_time = 0
         self.blink_duration = 1.0
@@ -344,7 +415,7 @@ class DragonBoss:
             if self.state == DragonBoss.State.MOVING:
                 self.animator.update_animation("idle")
                 self.state = DragonBoss.State.ATTACKING
-                self.fireball_cooldown = random.uniform(0.3,0.5)
+                self.fireball_cooldown = random.uniform(0.3, 0.5)
             else:
                 self.state = DragonBoss.State.MOVING
                 self.animator.update_animation("walk")
@@ -362,7 +433,8 @@ class DragonBoss:
                 self.state = DragonBoss.State.ATTACKING
                 self.animator.update_animation("idle")
             else:
-                self.visible = int(self.blink_time / self.blink_interval) % 2 == 0
+                self.visible = int(self.blink_time /
+                                   self.blink_interval) % 2 == 0
         else:
             self.visible = True
 
@@ -377,17 +449,17 @@ class DragonBoss:
                 self.body.apply_impulse_at_local_point((-self.velocity, 0))
                 self.facing_right = False
 
-
     def attack(self, player_position):
         if self.fireball_cooldown <= 0:
             fireball = Fireball(self.body.position, player_position)
             self.manager.add_fireball(fireball)
-            self.fireball_cooldown = random.uniform(0.3,0.5)
+            self.fireball_cooldown = random.uniform(0.3, 0.5)
 
     def draw(self, screen):
         if self.visible:
             x, y = self.body.position
-            self.animator.animate(x, y, screen, self.facing_right)
+            self.animator.animate(
+                x, y, screen, self.facing_right, color=(255, 0, 0))
 
     def take_damage(self):
         self.life -= 1
@@ -400,13 +472,13 @@ class DragonBoss:
             self.blink_time = self.blink_duration
 
     def die(self):
-        print("Dragon has been defeated!")
         self.animator.update_animation("death")
         self.state = DragonBoss.State.DEATH
         self.is_dead = True
         handle_dragon_ground = self.manager.space.add_collision_handler(4, 2)
         handle_dragon_ground.pre_solve = self.ignore_collision
         self.manager.player_interface.set_stage_text("VICTORY!")
+        self.manager.level_state = LevelState.GAME_OVER
 
     def ignore_collision(self, arbiter, space, data):
         return False
@@ -426,6 +498,7 @@ class Platform:
         vertices = [(self.body.position.x + v.x, self.body.position.y + v.y)
                     for v in vertices]
         pygame.draw.polygon(screen, (0, 255, 0), vertices, 1)
+
 
 class Fireball:
     def __init__(self, position, target_position):

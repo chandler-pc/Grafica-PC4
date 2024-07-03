@@ -1,6 +1,7 @@
 import pygame
 from menu import Menu
 import asyncio
+
 class Game:
     def __init__(self) -> None:
         pygame.init()

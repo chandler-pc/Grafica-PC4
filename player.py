@@ -42,6 +42,9 @@ class Player:
 
         self.life = 10
 
+        self.animation_move = False
+        self.position_to_move = 0
+
     def move(self):
         if not self.is_moving or self.attacking:
             return
@@ -66,7 +69,7 @@ class Player:
         self.animator.update_animation("idle")
 
     def jump(self):
-        if self.is_air or self.attacking:
+        if self.is_air or self.attacking or self.animation_move:
             return
         self.body.apply_impulse_at_local_point((0, -5500))
         self.is_air = True
@@ -74,6 +77,10 @@ class Player:
     def update(self, dt):
         if self.life <= 0:
             return
+        if self.animation_move:
+            if self.body.position.x < self.position_to_move:
+                self.animation_move = False
+                self.set_stop()
         self.move()
         self.animator.update(dt)
         if self.invincible:
@@ -114,7 +121,15 @@ class Player:
                 self.player_interface.set_life_text(f"Life {self.life}")
 
     def attack(self, enemy):
-        if not self.attacking and not self.is_air:
+        if not self.attacking and not self.is_air or self.animation_move:
             self.attacking = True
             self.attack_timer = 0.5
             enemy.take_damage()
+    
+    def move_to(self, position):
+        self.animation_move = True
+        self.position_to_move = position
+        if self.body.position.x < position:
+            self.set_direction(Direction.RIGHT)
+        else:
+            self.set_direction(Direction.LEFT)
