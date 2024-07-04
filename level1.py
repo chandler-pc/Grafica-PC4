@@ -269,7 +269,7 @@ class FallenLogObstacle:
 class ManagerLevel1:
     def __init__(self, space, player, player_interface, text_canvas):
         self.level_state = LevelState.TEXT
-        self.first_part_time = 5
+        self.first_part_time = 30
         self.is_first_part = True
         self.player_interface = player_interface
         self.space = space
@@ -294,6 +294,7 @@ class ManagerLevel1:
         self.space.add(fireball.body, fireball.shape)
 
     def update(self, dt):
+        print(self.level_state)
         if self.level_state == LevelState.FIRST_PART or len(self.logs) > 0:
             self.first_part_logic(dt)
         elif self.level_state == LevelState.SECOND_PART:

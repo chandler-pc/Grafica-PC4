@@ -1,0 +1,18 @@
+{
+    "life": {
+        "en": "Life",
+        "es": "Vida"
+    },
+    "dodge":{
+        "en": "Dodge the logs",
+        "es": "Esquiva los troncos"
+    },
+    "angry":{
+        "en": "Angry",
+        "es": "Ira"
+    },
+    "fight":{
+        "en": "Fight the boss",
+        "es": "Lucha contra el jefe"
+    }
+}

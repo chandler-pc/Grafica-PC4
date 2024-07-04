@@ -6,7 +6,11 @@
                 "Welcome to the first level!",
                 "Here, resilience is key.",
                 "For 30 seconds, you must dodge falling branches.",
-                "These branches symbolize daily stresses.",
+                "These branches symbolize daily stresses."
+            ]
+        },
+        {
+            "lines": [
                 "Just like in life, stress accumulates.",
                 "Stay strong and keep moving.",
                 "Focus and perseverance are essential.",
@@ -18,8 +22,7 @@
                 "Remember, resilience is about endurance.",
                 "Even small stresses can build up.",
                 "But you can overcome them.",
-                "Keep your eyes on the goal.",
-                ""
+                "Keep your eyes on the goal."
             ]
         }
     ],
@@ -29,12 +32,15 @@
                 "BOSS",
                 "Now, you face Anger.",
                 "Anger is fast and aggressive.",
-                "Meditation is your power-up.",
+                "Meditation is your power-up."
+            ]
+        },
+        {
+            "lines": [
                 "Use it to become invulnerable.",
                 "Wait for the right moment to strike.",
                 "Just like in real life, calm your mind.",
-                "Control your emotions to defeat anger.",
-                ""
+                "Control your emotions to defeat anger."
             ]
         }
     ],
@@ -44,9 +50,14 @@
                 "END",
                 "Congratulations! You defeated Anger.",
                 "In life, you can overcome emotions too.",
-                "No emotion is inherently good or bad.",
+                "No emotion is inherently good or bad."
+            ]
+        },
+        {
+            "lines": [
                 "Understanding and control are key.",
                 "You have the power to manage them.",
+                "",
                 ""
             ]
         }
@@ -57,7 +68,11 @@
                 "LOSE",
                 "You succumbed to your emotions.",
                 "In life, this happens too.",
-                "When emotions take over, we feel stuck.",
+                "When emotions take over, we feel stuck."
+            ]
+        },
+        {
+            "lines": [
                 "But remember, you can always try again.",
                 "Learning to manage emotions takes time.",
                 "Don't give up, keep practicing.",
