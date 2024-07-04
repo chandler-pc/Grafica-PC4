@@ -1,19 +1,24 @@
 {
-    "description": "The level 1",
+    "description": "El nivel 1",
     "initial": [
         {
             "lines": [
-                "Este es el primer párrafo del nivel 1",
-                "",
-                "",
+                "¡Bienvenido al primer nivel!",
+                "Aquí, la resiliencia es clave.",
+                "Durante 30 segundos, debes esquivar ramas que caen.",
+                "Estas ramas simbolizan el estrés diario.",
+                "Al igual que en la vida, el estrés se acumula.",
+                "Mantente fuerte y sigue avanzando.",
+                "El enfoque y la perseverancia son esenciales.",
                 ""
             ]
         },
         {
             "lines": [
-                "Este es el segundo párrafo del nivel 1",
-                "",
-                "",
+                "Recuerda, la resiliencia es sobre la resistencia.",
+                "Incluso los pequeños estreses pueden acumularse.",
+                "Pero puedes superarlos.",
+                "Mantén tus ojos en la meta.",
                 ""
             ]
         }
@@ -22,8 +27,13 @@
         {
             "lines": [
                 "JEFE",
-                "",
-                "",
+                "Ahora, enfrentas a la Ira.",
+                "La Ira es rápida y agresiva.",
+                "La meditación es tu poder especial.",
+                "Úsala para volverte invulnerable.",
+                "Espera el momento adecuado para atacar.",
+                "Al igual que en la vida real, calma tu mente.",
+                "Controla tus emociones para vencer la ira.",
                 ""
             ]
         }
@@ -31,9 +41,12 @@
     "final": [
         {
             "lines": [
-                "FINAL",
-                "",
-                "",
+                "FIN",
+                "¡Felicidades! Venciste a la Ira.",
+                "En la vida, también puedes superar las emociones.",
+                "Ninguna emoción es inherentemente buena o mala.",
+                "La comprensión y el control son clave.",
+                "Tienes el poder de gestionarlas.",
                 ""
             ]
         }
@@ -41,9 +54,13 @@
     "lose": [
         {
             "lines": [
-                "PERDER",
-                "",
-                "",
+                "PERDISTE",
+                "Sucumbiste a tus emociones.",
+                "En la vida, esto también sucede.",
+                "Cuando las emociones toman el control, nos sentimos atrapados.",
+                "Pero recuerda, siempre puedes intentarlo de nuevo.",
+                "Aprender a manejar las emociones lleva tiempo.",
+                "No te rindas, sigue practicando.",
                 ""
             ]
         }
